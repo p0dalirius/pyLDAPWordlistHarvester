@@ -6,7 +6,7 @@
 
 
 import argparse
-from sectools.windows.ldap import raw_ldap_query, init_ldap_session
+from sectools.windows.ldap.ldap import raw_ldap_query, init_ldap_session
 from sectools.windows.crypto import parse_lm_nt_hashes
 import os
 import sys
@@ -63,7 +63,7 @@ def parseArgs():
     authconn.add_argument("--dc-ip", required=True, action="store", metavar="ip address", help="IP Address of the domain controller or KDC (Key Distribution Center) for Kerberos. If omitted it will use the domain part (FQDN) specified in the identity parameter")
     authconn.add_argument('--kdcHost', dest="kdcHost", action='store', metavar="FQDN KDC", help='FQDN of KDC for Kerberos.')
     authconn.add_argument("-d", "--domain", dest="auth_domain", metavar="DOMAIN", action="store", default="", help="(FQDN) domain to authenticate to")
-    authconn.add_argument("-u", "--user", dest="auth_username", metavar="USER", action="store", default="", help="user to authenticate with")    
+    authconn.add_argument("-u", "--user", dest="auth_username", metavar="USER", action="store", default="", help="user to authenticate with")
     authconn.add_argument("--ldaps", dest="use_ldaps", action="store_true", default=False, help="Use LDAPS instead of LDAP")
 
     secret = parser.add_argument_group("Credentials")
@@ -77,9 +77,9 @@ def parseArgs():
     if len(sys.argv) == 1:
         parser.print_help()
         sys.exit(1)
-        
+
     options = parser.parse_args()
-    
+
     if options.auth_password is None and options.no_pass == False and options.auth_hashes is None and options.auth_key is None:
         print("[+] No password of hashes provided and --no-pass is '%s'" % options.no_pass)
         from getpass import getpass
@@ -93,7 +93,7 @@ def parseArgs():
 
 if __name__ == '__main__':
     options = parseArgs()
-    
+
     if options.auth_hashes is not None:
         if ":" not in options.auth_hashes:
             options.auth_hashes = ":" + options.auth_hashes
@@ -103,7 +103,7 @@ if __name__ == '__main__':
 
     if options.auth_key is not None:
         options.use_kerberos = True
-    
+
     if options.use_kerberos is True and options.kdcHost is None:
         print("[!] Specify KDC's Hostname of FQDN using the argument --kdcHost")
         exit()
@@ -112,15 +112,15 @@ if __name__ == '__main__':
 
     print("[>] Connecting to remote LDAP host '%s' ... " % options.dc_ip, end="", flush=True)
     ldap_server, ldap_session = init_ldap_session(
-        auth_domain=options.auth_domain, 
-        auth_username=options.auth_username, 
-        auth_password=options.auth_password, 
-        auth_lm_hash=auth_lm_hash, 
-        auth_nt_hash=auth_nt_hash, 
-        auth_key=options.auth_key, 
-        use_kerberos=options.use_kerberos, 
-        kdcHost=options.kdcHost, 
-        use_ldaps=options.use_ldaps, 
+        auth_domain=options.auth_domain,
+        auth_username=options.auth_username,
+        auth_password=options.auth_password,
+        auth_lm_hash=auth_lm_hash,
+        auth_nt_hash=auth_nt_hash,
+        auth_key=options.auth_key,
+        use_kerberos=options.use_kerberos,
+        kdcHost=options.kdcHost,
+        use_ldaps=options.use_ldaps,
         auth_dc_ip=options.dc_ip
     )
     configurationNamingContext = ldap_server.info.other["configurationNamingContext"]
