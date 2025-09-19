@@ -1,4 +1,4 @@
 pycryptodome
 xlsxwriter
-sectools>=1.4.1
+sectools==1.4.3
 ldap3
